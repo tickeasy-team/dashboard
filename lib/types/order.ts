@@ -1,3 +1,5 @@
+import type { User } from "./user"; // 導入 User 型別
+
 export type OrderStatus = 'held' | 'expired' | 'paid' | 'cancelled' | 'refunded';
 
 export interface Order {

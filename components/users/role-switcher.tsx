@@ -32,6 +32,7 @@ export function RoleSwitcher({ userId, currentRole, onRoleChange }: RoleSwitcher
         toast.error(result.error || "更新失敗");
       }
     } catch (error) {
+      console.error("更新角色時發生錯誤:", error);
       toast.error("更新角色時發生錯誤");
     } finally {
       setIsLoading(false);

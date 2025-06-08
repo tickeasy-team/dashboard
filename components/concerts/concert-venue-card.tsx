@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 
 interface ConcertVenueCardProps {
   venue: {
@@ -36,7 +37,7 @@ const ConcertVenueCard: React.FC<ConcertVenueCardProps> = ({ venue }) => {
         <div>
           <span className="font-medium">場地圖片：</span>
           {venue.venueImageUrl ? (
-            <img src={venue.venueImageUrl} alt="場地圖片" className="w-full max-w-xs rounded mt-1" />
+            <Image src={venue.venueImageUrl} alt="場地圖片" width={320} height={180} className="w-full max-w-xs rounded mt-1" />
           ) : "未提供"}
         </div>
         <div>

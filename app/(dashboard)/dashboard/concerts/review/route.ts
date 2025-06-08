@@ -54,7 +54,8 @@ export async function POST(req: NextRequest) {
     revalidatePath("/dashboard/concerts");
 
     return NextResponse.json({ success: true });
-  } catch (err) {
+  } catch (error) {
+    console.error("審核錯誤:", error);
     return NextResponse.json({ success: false, error: "伺服器錯誤" }, { status: 500 });
   }
 } 

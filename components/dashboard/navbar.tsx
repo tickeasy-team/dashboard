@@ -1,8 +1,5 @@
 "use client";
 
-import { useState } from "react";
-import { useAuth } from "@/components/auth/useAuth";
-import AuthDialog from "@/components/auth/AuthDialog";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -17,7 +14,6 @@ const navItems = [
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { user, logout } = useAuth();
 
   return (
     <nav className="w-full bg-white border-b shadow-sm">
@@ -46,36 +42,20 @@ export default function Navbar() {
         </div>
         {/* 右側：用戶資訊/登入註冊 */}
         <div className="flex items-center gap-3">
-          {user ? (
-            <div className="flex items-center gap-3">
-              {/* 用戶大頭貼 */}
-              <Avatar.Root className="w-8 h-8 rounded-full overflow-hidden border">
-                {user.avatar ? (
-                  <Avatar.Image src={user.avatar} alt={user.name || user.email} className="w-full h-full object-cover" />
-                ) : (
-                  <Avatar.Fallback className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-600 font-bold">
-                    {(user.name || user.email)[0]}
-                  </Avatar.Fallback>
-                )}
-              </Avatar.Root>
-              {/* 用戶名稱 */}
-              <span className="font-medium">{user.name || user.email}</span>
-              {/* 登出按鈕 */}
-              <button
-                onClick={logout}
-                className="ml-2 px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 text-sm"
-              >
-                登出
-              </button>
-            </div>
-          ) : (
-            <Link
-              href="/auth/login"
-              className="px-4 py-1 rounded bg-primary text-white hover:bg-primary/90 text-sm"
-            >
-              登入 / 註冊
-            </Link>
-          )}
+          {/* 用戶大頭貼 */}
+          <Avatar.Root className="w-8 h-8 rounded-full overflow-hidden border">
+            {/* 用戶大頭貼 */}
+          </Avatar.Root>
+          {/* 用戶名稱 */}
+          <span className="font-medium">
+            {/* 用戶名稱 */}
+          </span>
+          {/* 登出按鈕 */}
+          <button
+            className="ml-2 px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 text-sm"
+          >
+            登出
+          </button>
         </div>
       </div>
     </nav>

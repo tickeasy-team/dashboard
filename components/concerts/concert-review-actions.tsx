@@ -39,6 +39,7 @@ const ConcertReviewActions: React.FC<ConcertReviewActionsProps> = ({ concertId, 
         toast.error(result.error || "審核失敗");
       }
     } catch (error) {
+      console.error("審核時發生錯誤:", error);
       toast.error("審核時發生錯誤");
     } finally {
       setIsLoading(false);

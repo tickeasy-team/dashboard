@@ -1,27 +1,15 @@
-import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, MapPin, Calendar, Users, Globe, Phone, Mail } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { format } from "date-fns";
-import { zhTW } from "date-fns/locale";
 import ConcertBasicInfoCard from "@/components/concerts/concert-basic-info-card";
 import ConcertOrganizationCard from "@/components/concerts/concert-organization-card";
 import ConcertVenueCard from "@/components/concerts/concert-venue-card";
-import ConcertReviewHistory from "@/components/concerts/concert-review-history";
-import ConcertReviewActions from "@/components/concerts/concert-review-actions";
 import ConcertReviewPanel from "@/components/concerts/concert-review-panel";
 import ConcertSessionsAndTicketsCard from "@/components/concerts/concert-sessions-and-tickets-card";
 
-interface ConcertDetailPageProps {
-  params: {
-    id: string;
-  };
-}
-
-export default async function ConcertDetailPage({ params }: ConcertDetailPageProps) {
+export default async function ConcertDetailPage({ params }: { params: { id: string } }) {
   // 直接 fetch API 取得完整演唱會資料（含 sessions）
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/concerts/${params.id}`, { cache: "no-store" });
   const { data: concert } = await res.json();

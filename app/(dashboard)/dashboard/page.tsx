@@ -4,11 +4,7 @@ import {
   Users, 
   Music, 
   ShoppingCart, 
-  DollarSign,
-  CheckCircle,
-  Clock,
-  XCircle,
-  FileText
+  Clock
 } from "lucide-react";
 
 export default async function DashboardPage() {

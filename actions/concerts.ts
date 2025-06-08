@@ -1,5 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
-import { revalidatePath } from "next/cache";
+// 已移除 Supabase 依賴，改為純客戶端函數
 
 export async function reviewConcert(
   concertId: string,
@@ -8,57 +7,29 @@ export async function reviewConcert(
     notes?: string;
   }
 ) {
-  const supabase = await createClient();
-
-  // 檢查當前用戶權限
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return { success: false, error: "未授權" };
-  }
-
-  const { data: currentUser } = await supabase
-    .from("users")
-    .select("role")
-    .eq("email", user.email)
-    .single();
-
-  if (!currentUser || !["admin", "superuser"].includes(currentUser.role)) {
-    return { success: false, error: "沒有審核權限" };
-  }
-
   try {
-    // 調用審核 API
+    // 從 localStorage 取得 token（需於前端呼叫）
+    const token = typeof window !== "undefined" ? localStorage.getItem("tickeasy_token") : null;
+    if (!token) {
+      return { success: false, error: "未登入或缺少 token" };
+    }
+
+    // 呼叫後端 API，帶上 token
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/${concertId}/manual-review`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        // 如果需要認證 token，在這裡加上
+        "Authorization": `Bearer ${token}`,
       },
       body: JSON.stringify(reviewData),
     });
 
     if (!response.ok) {
-      throw new Error("API 調用失敗");
+      const errorText = await response.text();
+      return { success: false, error: errorText || "API 調用失敗" };
     }
 
-    // 更新資料庫中的審核狀態
-    const newConInfoStatus = reviewData.status === "approved" ? "published" : "rejected";
-    
-    const { error } = await supabase
-      .from("concert")
-      .update({ 
-        reviewStatus: reviewData.status,
-        reviewNote: reviewData.notes,
-        conInfoStatus: newConInfoStatus,
-        updatedAt: new Date().toISOString()
-      })
-      .eq("concertId", concertId);
-
-    if (error) {
-      throw error;
-    }
-
-    revalidatePath("/dashboard/concerts");
+    // 審核成功
     return { success: true };
   } catch (error) {
     console.error("Review error:", error);

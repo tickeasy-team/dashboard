@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { UserRole } from "@/lib/types/user";
-import { updateUserRole } from "@/actions/users";
 import {
   Select,
   SelectContent,
@@ -24,7 +23,21 @@ export function RoleSwitcher({ userId, currentRole, onRoleChange }: RoleSwitcher
   const handleRoleChange = async (newRole: string) => {
     setIsLoading(true);
     try {
-      const result = await updateUserRole(userId, newRole as UserRole);
+      const token = typeof window !== "undefined" ? localStorage.getItem("tickeasy_token") : null;
+      if (!token) {
+        toast.error("未登入或缺少 token");
+        setIsLoading(false);
+        return;
+      }
+      const res = await fetch("/dashboard/users/update-role", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({ userId, newRole }),
+      });
+      const result = await res.json();
       if (result.success) {
         onRoleChange(userId, newRole);
         toast.success("角色更新成功");

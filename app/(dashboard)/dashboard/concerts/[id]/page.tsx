@@ -70,7 +70,7 @@ export default async function ConcertDetailPage(props: { params: Promise<{ id: s
       {/* 場次與票價卡片 */}
       <ConcertSessionsAndTicketsCard sessions={concert.sessions || []} />
 
-      <ConcertReviewPanel concertId={concert.concertId} />
+      <ConcertReviewPanel concertId={concert.concertId} conInfoStatus={concert.conInfoStatus} />
     </div>
   );
 } 

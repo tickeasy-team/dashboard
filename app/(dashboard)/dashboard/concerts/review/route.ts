@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
     const { concertId, status, notes } = await req.json();
 
     // 權限驗證
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ success: false, error: "未授權" }, { status: 401 });

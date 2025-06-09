@@ -39,7 +39,8 @@ export function ConcertTable({ concerts: initialConcerts }: ConcertTableProps) {
     return matchesStatus && matchesSearch;
   });
 
-  const getStatusBadge = (status: Concert["conInfoStatus"], reviewStatus?: Concert["reviewStatus"]) => {
+  // 演唱會狀態標籤
+  const getStatusBadge = (status: Concert["conInfoStatus"]) => {
     const statusConfig = {
       draft: { label: "草稿", variant: "secondary" as const },
       reviewing: { label: "審核中", variant: "outline" as const },
@@ -49,17 +50,32 @@ export function ConcertTable({ concerts: initialConcerts }: ConcertTableProps) {
     };
 
     return (
-      <div className="flex gap-2">
-        <Badge variant={statusConfig[status].variant}>
-          {statusConfig[status].label}
+      <Badge variant={statusConfig[status].variant}>
+        {statusConfig[status].label}
+      </Badge>
+    );
+  };
+
+  // 審核狀態標籤
+  const getReviewStatusBadge = (reviewStatus?: Concert["reviewStatus"]) => {
+    if (!reviewStatus || reviewStatus === 'skipped') {
+      return (
+        <Badge variant="secondary" className="text-xs">
+          已跳過
         </Badge>
-        {reviewStatus && reviewStatus !== 'skipped' && (
-          <Badge variant="outline" className="text-xs">
-            {reviewStatus === 'pending' ? '待審' : 
-             reviewStatus === 'approved' ? '已通過' : '已拒絕'}
-          </Badge>
-        )}
-      </div>
+      );
+    }
+
+    const reviewConfig = {
+      pending: { label: "待審核", variant: "outline" as const },
+      approved: { label: "已通過", variant: "default" as const },
+      rejected: { label: "已拒絕", variant: "destructive" as const },
+    };
+
+    return (
+      <Badge variant={reviewConfig[reviewStatus].variant} className="text-xs">
+        {reviewConfig[reviewStatus].label}
+      </Badge>
     );
   };
 
@@ -93,7 +109,8 @@ export function ConcertTable({ concerts: initialConcerts }: ConcertTableProps) {
               <TableHead>主辦單位</TableHead>
               <TableHead>場地</TableHead>
               <TableHead>活動日期</TableHead>
-              <TableHead>狀態</TableHead>
+              <TableHead>演唱會狀態</TableHead>
+              <TableHead>審核狀態</TableHead>
               <TableHead>建立時間</TableHead>
               <TableHead className="text-right">操作</TableHead>
             </TableRow>
@@ -101,7 +118,7 @@ export function ConcertTable({ concerts: initialConcerts }: ConcertTableProps) {
           <TableBody>
             {filteredConcerts.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center">
+                <TableCell colSpan={8} className="text-center">
                   沒有找到演唱會
                 </TableCell>
               </TableRow>
@@ -125,7 +142,10 @@ export function ConcertTable({ concerts: initialConcerts }: ConcertTableProps) {
                       : "-"}
                   </TableCell>
                   <TableCell>
-                    {getStatusBadge(concert.conInfoStatus, concert.reviewStatus)}
+                    {getStatusBadge(concert.conInfoStatus)}
+                  </TableCell>
+                  <TableCell>
+                    {getReviewStatusBadge(concert.reviewStatus)}
                   </TableCell>
                   <TableCell>
                     {format(new Date(concert.createdAt), "yyyy/MM/dd", {
@@ -166,4 +186,4 @@ export function ConcertTable({ concerts: initialConcerts }: ConcertTableProps) {
       />
     </div>
   );
-} 
+}

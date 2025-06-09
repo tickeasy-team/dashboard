@@ -31,6 +31,17 @@ export default async function ConcertDetailPage(props: { params: Promise<{ id: s
     return statusConfig[status] || { label: status, variant: "outline" };
   };
 
+  const getReviewStatusBadge = (reviewStatus: string) => {
+    const reviewConfig: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+      pending: { label: "待審核", variant: "outline" },
+      approved: { label: "已通過", variant: "default" },
+      rejected: { label: "已拒絕", variant: "destructive" },
+      skipped: { label: "已跳過", variant: "secondary" },
+    };
+
+    return reviewConfig[reviewStatus] || { label: reviewStatus, variant: "outline" };
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -49,15 +60,22 @@ export default async function ConcertDetailPage(props: { params: Promise<{ id: s
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant={getStatusBadge(concert.conInfoStatus).variant}>
-            {getStatusBadge(concert.conInfoStatus).label}
-          </Badge>
-          {concert.reviewStatus && concert.reviewStatus !== 'skipped' && (
-            <Badge variant="outline">
-              審核：{concert.reviewStatus === 'pending' ? '待審' : 
-                    concert.reviewStatus === 'approved' ? '已通過' : '已拒絕'}
-            </Badge>
-          )}
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">演唱會狀態：</span>
+              <Badge variant={getStatusBadge(concert.conInfoStatus).variant}>
+                {getStatusBadge(concert.conInfoStatus).label}
+              </Badge>
+            </div>
+            {concert.reviewStatus && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">審核狀態：</span>
+                <Badge variant={getReviewStatusBadge(concert.reviewStatus).variant}>
+                  {getReviewStatusBadge(concert.reviewStatus).label}
+                </Badge>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -70,7 +88,12 @@ export default async function ConcertDetailPage(props: { params: Promise<{ id: s
       {/* 場次與票價卡片 */}
       <ConcertSessionsAndTicketsCard sessions={concert.sessions || []} />
 
-      <ConcertReviewPanel concertId={concert.concertId} conInfoStatus={concert.conInfoStatus} />
+      {/* 傳遞 reviewStatus 參數給 ConcertReviewPanel */}
+      <ConcertReviewPanel 
+        concertId={concert.concertId} 
+        conInfoStatus={concert.conInfoStatus}
+        reviewStatus={concert.reviewStatus}
+      />
     </div>
   );
-} 
+}

@@ -91,7 +91,6 @@ export default async function ConcertDetailPage(props: { params: Promise<{ id: s
       {/* 傳遞 reviewStatus 參數給 ConcertReviewPanel */}
       <ConcertReviewPanel 
         concertId={concert.concertId} 
-        conInfoStatus={concert.conInfoStatus}
         reviewStatus={concert.reviewStatus}
       />
     </div>

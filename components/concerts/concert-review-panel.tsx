@@ -5,14 +5,12 @@ import ConcertReviewActions from "./concert-review-actions";
 
 interface ConcertReviewPanelProps {
   concertId: string;
-  conInfoStatus: string;
   reviewStatus?: string; // 新增審核狀態參數
 }
 
 // 審核面板，整合審核紀錄與操作，審核後自動刷新紀錄
 const ConcertReviewPanel: React.FC<ConcertReviewPanelProps> = ({ 
   concertId, 
-  conInfoStatus, 
   reviewStatus 
 }) => {
   const [refreshKey, setRefreshKey] = useState(0);

@@ -6,7 +6,6 @@ import {
   ShoppingCart,
   Clock,
   CheckCircle,
-  XCircle,
   RefreshCw,
   AlertCircle
 } from "lucide-react";
@@ -64,7 +63,7 @@ export default async function OrdersPage() {
       </div> */}
 
       {/* 訂單統計卡片 */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <StatsCard
           title="總訂單數"
           value={stats.total}
@@ -87,12 +86,6 @@ export default async function OrdersPage() {
           value={stats.paid}
           icon={<CheckCircle className="h-4 w-4" />}
           className="border-green-200"
-        />
-        <StatsCard
-          title="已取消"
-          value={stats.cancelled}
-          icon={<XCircle className="h-4 w-4" />}
-          className={stats.cancelled > 0 ? "border-red-200" : ""}
         />
         <StatsCard
           title="已退款"

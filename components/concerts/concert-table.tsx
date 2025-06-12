@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Concert } from "@/lib/types/concert";
 import { ConcertFilters } from "./concert-filters";
-import { ReviewDialog } from "./review-dialog";
 import {
   Table,
   TableBody,
@@ -27,8 +26,6 @@ export function ConcertTable({ concerts: initialConcerts }: ConcertTableProps) {
   const [concerts, setConcerts] = useState(initialConcerts);
   const [filteredStatus, setFilteredStatus] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedConcert, setSelectedConcert] = useState<Concert | null>(null);
-  const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
 
   const filteredConcerts = concerts.filter((concert) => {
     const matchesStatus = filteredStatus === "all" || concert.conInfoStatus === filteredStatus;
@@ -76,21 +73,6 @@ export function ConcertTable({ concerts: initialConcerts }: ConcertTableProps) {
       <Badge variant={reviewConfig[reviewStatus].variant} className="text-xs">
         {reviewConfig[reviewStatus].label}
       </Badge>
-    );
-  };
-
-  const handleReview = (concert: Concert) => {
-    setSelectedConcert(concert);
-    setIsReviewDialogOpen(true);
-  };
-
-  const handleReviewComplete = (concertId: string, newStatus: string) => {
-    setConcerts((prev) =>
-      prev.map((concert) =>
-        concert.concertId === concertId
-          ? { ...concert, reviewStatus: newStatus as Concert["reviewStatus"] }
-          : concert
-      )
     );
   };
 
@@ -159,16 +141,7 @@ export function ConcertTable({ concerts: initialConcerts }: ConcertTableProps) {
                           <Eye className="h-4 w-4" />
                         </Button>
                       </Link>
-                      {concert.conInfoStatus === "reviewing" && 
-                       concert.reviewStatus === "pending" && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleReview(concert)}
-                        >
-                          審核
-                        </Button>
-                      )}
+                      {/* 審核按鈕已移除，請至詳細頁進行審核 */}
                     </div>
                   </TableCell>
                 </TableRow>
@@ -177,13 +150,6 @@ export function ConcertTable({ concerts: initialConcerts }: ConcertTableProps) {
           </TableBody>
         </Table>
       </div>
-
-      <ReviewDialog
-        concert={selectedConcert}
-        open={isReviewDialogOpen}
-        onOpenChange={setIsReviewDialogOpen}
-        onReviewComplete={handleReviewComplete}
-      />
     </div>
   );
 }

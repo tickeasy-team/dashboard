@@ -15,16 +15,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: "缺少必要參數" }, { status: 400 });
     }
 
-    // 轉發請求到後端 API
+    // 轉發請求到後端 API (使用 PATCH 並符合後端路由 /role)
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || "https://tickeasy-team-backend.onrender.com";
     const apiRes = await fetch(
-      `https://tickeasy-team-backend.onrender.com/api/v1/users/${userId}/update-role`,
+      `${apiBase}/api/v1/users/${userId}/role`,
       {
-        method: "POST",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           "Authorization": authHeader, // 轉發 token
         },
-        body: JSON.stringify({ newRole }),
+        body: JSON.stringify({ role: newRole }),
       }
     );
 

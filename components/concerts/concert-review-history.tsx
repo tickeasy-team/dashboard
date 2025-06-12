@@ -1,5 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 // AI 回應型別
 interface AIResponse {
@@ -42,6 +44,30 @@ function formatDate(iso: string) {
   const date = new Date(iso);
   return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()} ${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
 }
+
+// 將 AI 審核結果格式化為可讀文字
+const formatAIText = (r: ReviewRecord) => {
+  if (!r.aiResponse) return "";
+  const parts: string[] = [];
+  if (r.aiResponse.summary) parts.push(`AI 審核摘要：${r.aiResponse.summary}`);
+  if (r.aiResponse.reasons && r.aiResponse.reasons.length)
+    parts.push(`AI 主要理由：${r.aiResponse.reasons.join("、")}`);
+  if (r.aiResponse.suggestions && r.aiResponse.suggestions.length)
+    parts.push(`AI 建議調整：${r.aiResponse.suggestions.join("、")}`);
+  if (r.aiResponse.flaggedContent && r.aiResponse.flaggedContent.length)
+    parts.push(`AI 標記內容：${r.aiResponse.flaggedContent.join("、")}`);
+  return parts.join("\n");
+};
+
+// 複製到剪貼簿
+const handleCopy = async (rec: ReviewRecord) => {
+  try {
+    await navigator.clipboard.writeText(formatAIText(rec));
+    toast.success("AI 審核結果已複製");
+  } catch {
+    toast.error("複製失敗，請重試");
+  }
+};
 
 // 過往審核紀錄元件，顯示所有歷史審核紀錄
 const ConcertReviewHistory: React.FC<ConcertReviewHistoryProps> = ({ concertId }) => {
@@ -89,6 +115,16 @@ const ConcertReviewHistory: React.FC<ConcertReviewHistoryProps> = ({ concertId }
                 <span className="font-semibold">狀態：</span>
                 <span>{statusMap[record.reviewStatus] || record.reviewStatus}</span>
                 {record.reviewType === "ai_auto" && <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">AI</span>}
+                {record.reviewType === "ai_auto" && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="ml-auto text-xs"
+                    onClick={() => handleCopy(record)}
+                  >
+                    複製
+                  </Button>
+                )}
               </div>
               {/* 審核意見 */}
               {(record.reviewerNote || record.reviewNote) && (

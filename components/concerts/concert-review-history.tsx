@@ -48,15 +48,23 @@ function formatDate(iso: string) {
 // 將 AI 審核結果格式化為可讀文字
 const formatAIText = (r: ReviewRecord) => {
   if (!r.aiResponse) return "";
-  const parts: string[] = [];
-  if (r.aiResponse.summary) parts.push(`AI 審核摘要：${r.aiResponse.summary}`);
-  if (r.aiResponse.reasons && r.aiResponse.reasons.length)
-    parts.push(`AI 主要理由：${r.aiResponse.reasons.join("、")}`);
-  if (r.aiResponse.suggestions && r.aiResponse.suggestions.length)
-    parts.push(`AI 建議調整：${r.aiResponse.suggestions.join("、")}`);
-  if (r.aiResponse.flaggedContent && r.aiResponse.flaggedContent.length)
-    parts.push(`AI 標記內容：${r.aiResponse.flaggedContent.join("、")}`);
-  return parts.join("\n");
+  const sections: string[] = [];
+  if (r.aiResponse.summary) {
+    sections.push(`AI 審核摘要：\n${r.aiResponse.summary}`);
+  }
+  if (r.aiResponse.reasons && r.aiResponse.reasons.length) {
+    const list = r.aiResponse.reasons.map((it) => `- ${it}`).join("\n");
+    sections.push(`AI 主要理由：\n${list}`);
+  }
+  if (r.aiResponse.suggestions && r.aiResponse.suggestions.length) {
+    const list = r.aiResponse.suggestions.map((it) => `- ${it}`).join("\n");
+    sections.push(`AI 建議調整：\n${list}`);
+  }
+  if (r.aiResponse.flaggedContent && r.aiResponse.flaggedContent.length) {
+    const list = r.aiResponse.flaggedContent.map((it) => `- ${it}`).join("\n");
+    sections.push(`AI 標記內容：\n${list}`);
+  }
+  return sections.join("\n\n");
 };
 
 // 複製到剪貼簿
@@ -132,7 +140,10 @@ const ConcertReviewHistory: React.FC<ConcertReviewHistoryProps> = ({ concertId }
               )}
               {/* AI 審核摘要 */}
               {record.aiResponse?.summary && (
-                <div><span className="font-semibold">AI 審核摘要：</span>{record.aiResponse.summary}</div>
+                <div>
+                  <span className="font-semibold">AI 審核摘要：</span>
+                  <span className="whitespace-pre-wrap">{record.aiResponse.summary}</span>
+                </div>
               )}
               {/* AI 判定結果 */}
               {record.aiResponse?.approved !== undefined && (

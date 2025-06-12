@@ -14,15 +14,19 @@ const ConcertReviewPanel: React.FC<ConcertReviewPanelProps> = ({
   reviewStatus 
 }) => {
   const [refreshKey, setRefreshKey] = useState(0);
+  const [currentStatus, setCurrentStatus] = useState(reviewStatus);
 
-  // 當審核完成時，刷新審核紀錄
-  const handleReviewComplete = () => setRefreshKey((k) => k + 1);
+  // 當審核完成時，刷新紀錄並更新狀態
+  const handleReviewComplete = (newStatus: "approved" | "rejected") => {
+    setRefreshKey((k) => k + 1);
+    setCurrentStatus(newStatus);
+  };
 
   return (
     <div>
       <ConcertReviewHistory key={refreshKey} concertId={concertId} />
       {/* 只有當審核狀態為 'pending' 時才顯示審核操作區塊 */}
-      {reviewStatus === 'pending' && (
+      {currentStatus === 'pending' && (
         <ConcertReviewActions concertId={concertId} onReviewComplete={handleReviewComplete} />
       )}
     </div>

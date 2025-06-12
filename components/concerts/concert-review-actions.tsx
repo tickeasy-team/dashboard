@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 
 interface ConcertReviewActionsProps {
   concertId: string;
-  onReviewComplete: () => void;
+  onReviewComplete: (newStatus: "approved" | "rejected") => void;
 }
 
 // 人工審核操作元件，管理者可輸入備註並通過/拒絕審核
@@ -34,6 +34,11 @@ const ConcertReviewActions: React.FC<ConcertReviewActionsProps> = ({ concertId, 
   const submitReview = async () => {
     if (!confirmAction) return;
 
+    if (!reviewNote.trim()) {
+      toast.error("請輸入審核意見");
+      return;
+    }
+
     setIsLoading(true);
     try {
       // 從 localStorage 取得 token，並加到 Authorization header
@@ -46,15 +51,15 @@ const ConcertReviewActions: React.FC<ConcertReviewActionsProps> = ({ concertId, 
         },
         body: JSON.stringify({
           concertId,
-          status: confirmAction,
-          notes: reviewNote,
+          reviewStatus: confirmAction,
+          reviewerNote: reviewNote,
         }),
       });
       const result = await res.json();
       if (result.success) {
         toast.success(confirmAction === "approved" ? "演唱會已通過審核" : "演唱會已拒絕");
         setReviewNote("");
-        onReviewComplete();
+        onReviewComplete(confirmAction);
       } else {
         toast.error(result.error || "審核失敗");
       }

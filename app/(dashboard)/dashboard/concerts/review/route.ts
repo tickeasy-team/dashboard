@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 // 只允許 POST 請求
 export async function POST(req: NextRequest) {
   try {
-    const { concertId, status, notes } = await req.json();
+    const { concertId, reviewStatus, reviewerNote } = await req.json();
 
     // 從前端 header 取得 token
     const authHeader = req.headers.get("authorization"); // 取得 Authorization: Bearer <token>
@@ -12,16 +12,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: "缺少授權資訊" }, { status: 401 });
     }
 
-    // 直接呼叫後端 API，讓後端處理認證與權限
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || "https://tickeasy-team-backend.onrender.com";
     const apiRes = await fetch(
-      `https://tickeasy-team-backend.onrender.com/api/v1/${concertId}/manual-review`,
+      `${apiBase}/api/v1/concerts/${concertId}/manual-review`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": authHeader, // 轉發 token 給後端
         },
-        body: JSON.stringify({ status, notes }),
+        body: JSON.stringify({ reviewStatus, reviewerNote }),
       }
     );
     if (!apiRes.ok) {

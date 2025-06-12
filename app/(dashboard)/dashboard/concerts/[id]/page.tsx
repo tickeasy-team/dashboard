@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import ConcertBasicInfoCard from "@/components/concerts/concert-basic-info-card";
-import ConcertOrganizationCard from "@/components/concerts/concert-organization-card";
 import ConcertVenueCard from "@/components/concerts/concert-venue-card";
 import ConcertReviewPanel from "@/components/concerts/concert-review-panel";
 import ConcertSessionsAndTicketsCard from "@/components/concerts/concert-sessions-and-tickets-card";
@@ -79,9 +78,8 @@ export default async function ConcertDetailPage(props: { params: Promise<{ id: s
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2">
         <ConcertBasicInfoCard concert={concert} />
-        <ConcertOrganizationCard organization={concert.organization || {}} />
         <ConcertVenueCard venue={concert.venue || {}} />
       </div>
 

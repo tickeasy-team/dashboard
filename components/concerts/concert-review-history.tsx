@@ -1,6 +1,18 @@
 "use client";
 import React, { useEffect, useState } from "react";
 
+// AI 回應型別
+interface AIResponse {
+  summary?: string;
+  reasons?: string[];
+  suggestions?: string[];
+  approved?: boolean;
+  confidence?: number; // 0–1 之間
+  flaggedContent?: string[];
+  requiresManualReview?: boolean;
+  rawResponse?: Record<string, unknown>;
+}
+
 interface ReviewRecord {
   reviewId?: string;
   concertId?: string;
@@ -9,11 +21,7 @@ interface ReviewRecord {
   reviewNote?: string | null; // 舊欄位
   reviewerNote?: string | null; // 新欄位
   reviewerId?: string | null;
-  aiResponse?: {
-    summary?: string;
-    reasons?: string[];
-    suggestions?: string[];
-  };
+  aiResponse?: AIResponse;
   createdAt: string;
   updatedAt?: string;
 }
@@ -90,6 +98,25 @@ const ConcertReviewHistory: React.FC<ConcertReviewHistoryProps> = ({ concertId }
               {record.aiResponse?.summary && (
                 <div><span className="font-semibold">AI 審核摘要：</span>{record.aiResponse.summary}</div>
               )}
+              {/* AI 判定結果 */}
+              {record.aiResponse?.approved !== undefined && (
+                <div>
+                  <span className="font-semibold">AI 判定結果：</span>
+                  {record.aiResponse.approved ? (
+                    <span className="text-green-600 font-semibold">✅ 通過</span>
+                  ) : (
+                    <span className="text-red-600 font-semibold">❌ 未通過</span>
+                  )}
+                </div>
+              )}
+              {/* AI 信心度 */}
+              {record.aiResponse?.confidence !== undefined && (
+                <div><span className="font-semibold">AI 信心度：</span>{Math.round((record.aiResponse.confidence || 0) * 100)}%</div>
+              )}
+              {/* 需人工複審 */}
+              {record.aiResponse?.requiresManualReview && (
+                <div className="text-yellow-700"><span className="font-semibold">需人工複審：</span>是</div>
+              )}
               {/* AI 主要理由 */}
               {record.aiResponse?.reasons && record.aiResponse.reasons.length > 0 && (
                 <div>
@@ -97,6 +124,17 @@ const ConcertReviewHistory: React.FC<ConcertReviewHistoryProps> = ({ concertId }
                   <ul className="list-disc pl-5">
                     {record.aiResponse.reasons.map((r, i) => (
                       <li key={i}>{r}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {/* 被標記內容 */}
+              {record.aiResponse?.flaggedContent && record.aiResponse.flaggedContent.length > 0 && (
+                <div>
+                  <span className="font-semibold">AI 標記內容：</span>
+                  <ul className="list-disc pl-5 text-red-600">
+                    {record.aiResponse.flaggedContent.map((c, i) => (
+                      <li key={i}>{c}</li>
                     ))}
                   </ul>
                 </div>
@@ -111,6 +149,13 @@ const ConcertReviewHistory: React.FC<ConcertReviewHistoryProps> = ({ concertId }
                     ))}
                   </ul>
                 </div>
+              )}
+              {/* 原始回應 (收合) */}
+              {record.aiResponse?.rawResponse && (
+                <details className="mt-1 select-text whitespace-pre-wrap break-all bg-gray-100 rounded p-2">
+                  <summary className="cursor-pointer font-semibold text-sm">查看原始 JSON</summary>
+                  <pre className="text-xs">{JSON.stringify(record.aiResponse.rawResponse, null, 2)}</pre>
+                </details>
               )}
               {/* 審核人員 */}
               <div><span className="font-semibold">審核人員：</span>{record.reviewerId ? record.reviewerId : (record.reviewType === "ai_auto" ? "AI" : "系統")}</div>

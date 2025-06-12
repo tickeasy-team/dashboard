@@ -190,16 +190,6 @@ export function OrderTable({ orders }: OrderTableProps) {
               )}
 
               <div>
-                <h4 className="font-medium mb-2">發票資訊</h4>
-                <div className="space-y-1 text-sm">
-                  <p>發票類型：{selectedOrder.invoiceType || "-"}</p>
-                  <p>載具：{selectedOrder.invoiceCarrier || "-"}</p>
-                  <p>發票號碼：{selectedOrder.invoiceNumber || "-"}</p>
-                  <p>發票狀態：{selectedOrder.invoiceStatus || "-"}</p>
-                </div>
-              </div>
-
-              <div>
                 <h4 className="font-medium mb-2">其他資訊</h4>
                 <div className="space-y-1 text-sm">
                   <p>付款方式：{selectedOrder.choosePayment || "-"}</p>

@@ -149,17 +149,26 @@ const ConcertReviewHistory: React.FC<ConcertReviewHistoryProps> = ({ concertId }
                   <span className="whitespace-pre-wrap">{record.aiResponse.summary}</span>
                 </div>
               )}
-              {/* AI 判定結果 */}
-              {record.aiResponse?.approved !== undefined && (
-                <div>
-                  <span className="font-semibold">AI 判定結果：</span>
-                  {record.aiResponse.approved ? (
-                    <span className="text-green-600 font-semibold">✅ 通過</span>
-                  ) : (
-                    <span className="text-red-600 font-semibold">❌ 未通過</span>
-                  )}
-                </div>
-              )}
+              {/* AI 判定結果：若 aiResponse.approved 缺失，根據 reviewStatus 推斷 */}
+              {(() => {
+                // 先取 aiResponse.approved；若不存在則根據 reviewStatus 推斷
+                const approvedFlag =
+                  record.aiResponse?.approved !== undefined
+                    ? record.aiResponse?.approved
+                    : record.reviewType === "ai_auto"
+                      ? (record.reviewStatus === "approved" ? true : record.reviewStatus === "rejected" ? false : undefined)
+                      : undefined;
+                return approvedFlag !== undefined ? (
+                  <div>
+                    <span className="font-semibold">AI 判定結果：</span>
+                    {approvedFlag ? (
+                      <span className="text-green-600 font-semibold">✅ 通過</span>
+                    ) : (
+                      <span className="text-red-600 font-semibold">❌ 未通過</span>
+                    )}
+                  </div>
+                ) : null;
+              })()}
               {/* AI 信心度 */}
               {record.aiResponse?.confidence !== undefined && (
                 <div><span className="font-semibold">AI 信心度：</span>{Math.round((record.aiResponse.confidence || 0) * 100)}%</div>

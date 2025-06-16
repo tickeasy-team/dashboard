@@ -23,7 +23,8 @@ interface ConcertTableProps {
 }
 
 export function ConcertTable({ concerts: initialConcerts }: ConcertTableProps) {
-  const [concerts, setConcerts] = useState(initialConcerts);
+  // 直接使用 props 傳入的演唱會資料，不建立多餘的 state
+  const concerts = initialConcerts;
   const [filteredStatus, setFilteredStatus] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
 

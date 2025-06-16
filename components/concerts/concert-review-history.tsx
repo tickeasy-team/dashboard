@@ -70,7 +70,9 @@ const formatAIText = (r: ReviewRecord) => {
 // 複製到剪貼簿
 const handleCopy = async (rec: ReviewRecord) => {
   try {
-    await navigator.clipboard.writeText(formatAIText(rec));
+    const text = formatAIText(rec);
+    console.log("[AI Review Copy]", text);
+    await navigator.clipboard.writeText(text);
     toast.success("AI 審核結果已複製");
   } catch {
     toast.error("複製失敗，請重試");
@@ -95,6 +97,8 @@ const ConcertReviewHistory: React.FC<ConcertReviewHistoryProps> = ({ concertId }
     })
       .then(res => res.json())
       .then(data => {
+        // 在瀏覽器 console 印出完整 API 回傳資料，方便除錯
+        console.log("[Fetch review data]", data);
         let arr: ReviewRecord[] = [];
         if (data.status === "success" && data.data && Array.isArray(data.data.reviews)) {
           arr = data.data.reviews;

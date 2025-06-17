@@ -45,23 +45,29 @@ function formatDate(iso: string) {
   return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()} ${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
 }
 
+// 處理換行符號 - 將 \n 轉換為真正的換行
+function processLineBreaks(text: string): string {
+  if (!text) return "";
+  return text.replace(/\\n/g, '\n');
+}
+
 // 將 AI 審核結果格式化為可讀文字
 const formatAIText = (r: ReviewRecord) => {
   if (!r.aiResponse) return "";
   const sections: string[] = [];
   if (r.aiResponse.summary) {
-    sections.push(`AI 審核摘要：\n${r.aiResponse.summary}`);
+    sections.push(`AI 審核摘要：\n${processLineBreaks(r.aiResponse.summary)}`);
   }
   if (r.aiResponse.reasons && r.aiResponse.reasons.length) {
-    const list = r.aiResponse.reasons.map((it) => `- ${it}`).join("\n");
+    const list = r.aiResponse.reasons.map((it) => `- ${processLineBreaks(it)}`).join("\n");
     sections.push(`AI 主要理由：\n${list}`);
   }
   if (r.aiResponse.suggestions && r.aiResponse.suggestions.length) {
-    const list = r.aiResponse.suggestions.map((it) => `- ${it}`).join("\n");
+    const list = r.aiResponse.suggestions.map((it) => `- ${processLineBreaks(it)}`).join("\n");
     sections.push(`AI 建議調整：\n${list}`);
   }
   if (r.aiResponse.flaggedContent && r.aiResponse.flaggedContent.length) {
-    const list = r.aiResponse.flaggedContent.map((it) => `- ${it}`).join("\n");
+    const list = r.aiResponse.flaggedContent.map((it) => `- ${processLineBreaks(it)}`).join("\n");
     sections.push(`AI 標記內容：\n${list}`);
   }
   return sections.join("\n\n");
@@ -89,7 +95,7 @@ const ConcertReviewHistory: React.FC<ConcertReviewHistoryProps> = ({ concertId }
   
   // 🔧 除錯開關 - 設為 true 時顯示除錯面板
   // 👉 如需除錯：將下列 false 改為 true
-  const SHOW_DEBUG = false; // ✅ 已隱藏除錯資訊，使用者看不到
+  const SHOW_DEBUG = false; // ✅ 关闭 debug 面板，但保留 console 输出
 
   // 確保組件已經在客戶端掛載
   useEffect(() => {
@@ -170,6 +176,9 @@ const ConcertReviewHistory: React.FC<ConcertReviewHistoryProps> = ({ concertId }
           return data;
         })
         .then(data => {
+          // ✨ 始终打印完整的 API 回应数据，方便查看审核记录
+          console.log("🎆 === 審核記錄 API 回應 ===", data);
+          
           // 在瀏覽器 console 印出完整 API 回傳資料，方便除錯
           if (SHOW_DEBUG) {
             console.log("🎯 [API Response Data]", data);
@@ -217,6 +226,26 @@ const ConcertReviewHistory: React.FC<ConcertReviewHistoryProps> = ({ concertId }
                 createdAt: record.createdAt,
                 hasAiResponse: !!record.aiResponse
               });
+              
+              // 打印完整的審核紀錄
+              console.log(`  📄 記錄 ${index + 1} 完整資料:`, record);
+              
+              // 如果有 AI 回應，詳細打印
+              if (record.aiResponse) {
+                console.log(`  🤖 記錄 ${index + 1} AI 回應:`, record.aiResponse);
+                console.log(`  📝 記錄 ${index + 1} AI 摘要:`, record.aiResponse.summary);
+                console.log(`  📝 記錄 ${index + 1} AI 摘要(處理後):`, processLineBreaks(record.aiResponse.summary || ""));
+                console.log(`  📋 記錄 ${index + 1} AI 理由:`, record.aiResponse.reasons);
+                console.log(`  💡 記錄 ${index + 1} AI 建議:`, record.aiResponse.suggestions);
+                console.log(`  🚩 記錄 ${index + 1} AI 標記內容:`, record.aiResponse.flaggedContent);
+              }
+              
+              // 審核意見
+              if (record.reviewerNote || record.reviewNote) {
+                console.log(`  💬 記錄 ${index + 1} 審核意見:`, record.reviewerNote || record.reviewNote);
+              }
+              
+              console.log("---"); // 分隔線
             });
           }
           
@@ -364,13 +393,16 @@ const ConcertReviewHistory: React.FC<ConcertReviewHistoryProps> = ({ concertId }
               </div>
               {/* 審核意見 */}
               {(record.reviewerNote || record.reviewNote) && (
-                <div><span className="font-semibold">審核意見：</span>{record.reviewerNote || record.reviewNote}</div>
+                <div>
+                  <span className="font-semibold">審核意見：</span>
+                  <span className="whitespace-pre-wrap">{processLineBreaks(record.reviewerNote || record.reviewNote || "")}</span>
+                </div>
               )}
               {/* AI 審核摘要 */}
               {record.aiResponse?.summary && (
                 <div>
                   <span className="font-semibold">AI 審核摘要：</span>
-                  <span className="whitespace-pre-wrap">{record.aiResponse.summary}</span>
+                  <span className="whitespace-pre-wrap">{processLineBreaks(record.aiResponse.summary)}</span>
                 </div>
               )}
               {/* AI 判定結果：若 aiResponse.approved 缺失，根據 reviewStatus 推斷 */}
@@ -407,7 +439,7 @@ const ConcertReviewHistory: React.FC<ConcertReviewHistoryProps> = ({ concertId }
                   <span className="font-semibold">AI 主要理由：</span>
                   <ul className="list-disc pl-5">
                     {record.aiResponse.reasons.map((r, i) => (
-                      <li key={i}>{r}</li>
+                      <li key={i} className="whitespace-pre-wrap">{processLineBreaks(r)}</li>
                     ))}
                   </ul>
                 </div>
@@ -418,7 +450,7 @@ const ConcertReviewHistory: React.FC<ConcertReviewHistoryProps> = ({ concertId }
                   <span className="font-semibold">AI 標記內容：</span>
                   <ul className="list-disc pl-5 text-red-600">
                     {record.aiResponse.flaggedContent.map((c, i) => (
-                      <li key={i}>{c}</li>
+                      <li key={i} className="whitespace-pre-wrap">{processLineBreaks(c)}</li>
                     ))}
                   </ul>
                 </div>
@@ -429,7 +461,7 @@ const ConcertReviewHistory: React.FC<ConcertReviewHistoryProps> = ({ concertId }
                   <span className="font-semibold">AI 建議調整：</span>
                   <ul className="list-disc pl-5">
                     {record.aiResponse.suggestions.map((s, i) => (
-                      <li key={i}>{s}</li>
+                      <li key={i} className="whitespace-pre-wrap">{processLineBreaks(s)}</li>
                     ))}
                   </ul>
                 </div>

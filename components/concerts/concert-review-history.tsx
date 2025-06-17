@@ -71,7 +71,7 @@ const formatAIText = (r: ReviewRecord) => {
 const handleCopy = async (rec: ReviewRecord) => {
   try {
     const text = formatAIText(rec);
-    console.log("[AI Review Copy]", text);
+    // console.log("[AI Review Copy]", text); // 在生產環境不顯示
     await navigator.clipboard.writeText(text);
     toast.success("AI 審核結果已複製");
   } catch {
@@ -83,44 +83,268 @@ const handleCopy = async (rec: ReviewRecord) => {
 const ConcertReviewHistory: React.FC<ConcertReviewHistoryProps> = ({ concertId }) => {
   const [records, setRecords] = useState<ReviewRecord[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [debugInfo, setDebugInfo] = useState<any>(null);
+  const [mounted, setMounted] = useState(false);
+  
+  // 🔧 除錯開關 - 設為 true 時顯示除錯面板
+  // 👉 如需除錯：將下列 false 改為 true
+  const SHOW_DEBUG = false; // ✅ 已隱藏除錯資訊，使用者看不到
+
+  // 確保組件已經在客戶端掛載
+  useEffect(() => {
+    setMounted(true);
+    if (SHOW_DEBUG) console.log("🚀 ConcertReviewHistory 組件已掛載");
+  }, []);
 
   useEffect(() => {
-    if (!concertId) return;
+    if (!mounted) {
+      if (SHOW_DEBUG) console.log("⏳ 組件尚未掛載，等待中...");
+      return;
+    }
+    
+    if (!concertId) {
+      if (SHOW_DEBUG) console.log("❌ ConcertId 不存在:", concertId);
+      setError("演唱會 ID 不存在");
+      return;
+    }
+
+    if (SHOW_DEBUG) {
+      console.log("🚀 開始載入審核紀錄");
+      console.log("📍 Concert ID:", concertId);
+      console.log("🌍 環境:", process.env.NODE_ENV);
+      console.log("🔗 API URL base:", process.env.NEXT_PUBLIC_API_URL);
+    }
+    
     setLoading(true);
-    // 從 localStorage 取得 token，並加到 Authorization header
-    const token = typeof window !== "undefined" ? localStorage.getItem("tickeasy_token") : null;
-    fetch(`https://tickeasy-team-backend.onrender.com/api/v1/concerts/${concertId}/reviews`, {
-      headers: {
+    setError(null);
+    setDebugInfo(null);
+
+    // 延遲執行，確保 localStorage 完全可用
+    const timer = setTimeout(() => {
+      // 檢查 token
+      const token = typeof window !== "undefined" ? localStorage.getItem("tickeasy_token") : null;
+      
+      if (SHOW_DEBUG) {
+        console.log("🔑 Token 檢查:");
+        console.log("  - 存在:", token ? "是" : "否");
+        console.log("  - 長度:", token?.length || 0);
+        console.log("  - 前20字元:", token?.substring(0, 20) + "...");
+      }
+
+      const apiUrl = `https://tickeasy-team-backend.onrender.com/api/v1/concerts/${concertId}/reviews`;
+      if (SHOW_DEBUG) console.log("📡 完整 API URL:", apiUrl);
+
+      const headers = {
         ...(token ? { "Authorization": `Bearer ${token}` } : {}),
         "Content-Type": "application/json"
+      };
+      if (SHOW_DEBUG) {
+        console.log("📋 Request headers:", headers);
+        console.log("⏰ 發送 API 請求時間:", new Date().toISOString());
       }
-    })
-      .then(res => res.json())
-      .then(data => {
-        // 在瀏覽器 console 印出完整 API 回傳資料，方便除錯
-        console.log("[Fetch review data]", data);
-        let arr: ReviewRecord[] = [];
-        if (data.status === "success" && data.data && Array.isArray(data.data.reviews)) {
-          arr = data.data.reviews;
-        } else if (data.status === "success" && Array.isArray(data.data)) {
-          arr = data.data;
-        }
-        // 以時間倒序排列
-        setRecords([...arr].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+
+      fetch(apiUrl, { 
+        headers,
+        method: 'GET',
+        cache: 'no-cache'
       })
-      .catch(() => setRecords([]))
-      .finally(() => setLoading(false));
-  }, [concertId]);
+        .then(async (res) => {
+          if (SHOW_DEBUG) {
+            console.log("📥 Response 收到:");
+            console.log("  - Status:", res.status);
+            console.log("  - Status Text:", res.statusText);
+            console.log("  - Headers:", Object.fromEntries(res.headers.entries()));
+            console.log("  - URL:", res.url);
+            console.log("  - OK:", res.ok);
+          }
+          
+          if (!res.ok) {
+            const errorText = await res.text();
+            if (SHOW_DEBUG) console.log("❌ Response error text:", errorText);
+            throw new Error(`HTTP ${res.status}: ${res.statusText}\n${errorText}`);
+          }
+          
+          const data = await res.json();
+          if (SHOW_DEBUG) console.log("✅ Response JSON 解析成功");
+          return data;
+        })
+        .then(data => {
+          // 在瀏覽器 console 印出完整 API 回傳資料，方便除錯
+          if (SHOW_DEBUG) {
+            console.log("🎯 [API Response Data]", data);
+            console.log("📊 資料結構分析:");
+            console.log("  - typeof data:", typeof data);
+            console.log("  - data.status:", data?.status);
+            console.log("  - data.message:", data?.message);
+            console.log("  - typeof data.data:", typeof data?.data);
+            console.log("  - Array.isArray(data.data):", Array.isArray(data?.data));
+            console.log("  - data.data?.reviews:", data?.data?.reviews);
+            console.log("  - Array.isArray(data.data?.reviews):", Array.isArray(data?.data?.reviews));
+          }
+          
+          setDebugInfo(data);
+          
+          let arr: ReviewRecord[] = [];
+          
+          // 嘗試多種資料結構
+          if (data.status === "success" && data.data && Array.isArray(data.data.reviews)) {
+            arr = data.data.reviews;
+            if (SHOW_DEBUG) console.log("✅ 使用 data.data.reviews 路徑，筆數:", arr.length);
+          } else if (data.status === "success" && Array.isArray(data.data)) {
+            arr = data.data;
+            if (SHOW_DEBUG) console.log("✅ 使用 data.data 路徑，筆數:", arr.length);
+          } else if (Array.isArray(data)) {
+            arr = data;
+            if (SHOW_DEBUG) console.log("✅ 使用 data 直接路徑，筆數:", arr.length);
+          } else if (data.reviews && Array.isArray(data.reviews)) {
+            arr = data.reviews;
+            if (SHOW_DEBUG) console.log("✅ 使用 data.reviews 路徑，筆數:", arr.length);
+          } else {
+            if (SHOW_DEBUG) {
+              console.log("⚠️ 無法解析的資料結構:", data);
+              console.log("📝 嘗試的路徑都不符合，設為空陣列");
+            }
+          }
+          
+          if (SHOW_DEBUG) {
+            console.log("📋 原始紀錄數據:");
+            arr.forEach((record, index) => {
+              console.log(`  記錄 ${index + 1}:`, {
+                reviewId: record.reviewId,
+                reviewStatus: record.reviewStatus,
+                reviewType: record.reviewType,
+                createdAt: record.createdAt,
+                hasAiResponse: !!record.aiResponse
+              });
+            });
+          }
+          
+          // 以時間倒序排列
+          const sortedRecords = [...arr].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          if (SHOW_DEBUG) console.log("📋 排序後最終設定的紀錄數:", sortedRecords.length);
+          
+          setRecords(sortedRecords);
+          setError(null);
+        })
+        .catch((err) => {
+          if (SHOW_DEBUG) {
+            console.error("❌ [API Error]", err);
+            console.error("❌ Error stack:", err.stack);
+          }
+          setError(err.message);
+          setRecords([]);
+          setDebugInfo({ error: err.message, stack: err.stack });
+        })
+        .finally(() => {
+          setLoading(false);
+          if (SHOW_DEBUG) console.log("🏁 API 請求完成，時間:", new Date().toISOString());
+        });
+    }, 200); // 延遲 200ms 確保環境準備好
+
+    return () => {
+      clearTimeout(timer);
+      if (SHOW_DEBUG) console.log("🧹 清理計時器");
+    };
+  }, [concertId, mounted]);
+
+  // 在服務端或尚未掛載時的處理
+  if (!mounted) {
+    if (SHOW_DEBUG) console.log("⏳ 組件尚未掛載，顯示載入狀態");
+    return (
+      <div className="mt-6">
+        <h2 className="text-xl font-bold mb-2">審核紀錄</h2>
+        <div className="text-sm text-muted-foreground">初始化中...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="mt-6">
       <h2 className="text-xl font-bold mb-2">審核紀錄</h2>
+      
+      {/* 🔧 Debug 資訊區塊 - 只在開發模式或 SHOW_DEBUG 為 true 時顯示 */}
+      {SHOW_DEBUG && (
+        <div className="mb-4 p-3 bg-gray-100 rounded text-xs font-mono">
+          <div className="font-bold text-blue-700 mb-2">🔍 除錯資訊:</div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>Concert ID: <span className="text-blue-600">{concertId || "未設定"}</span></div>
+            <div>Loading: <span className={loading ? "text-orange-600" : "text-green-600"}>{loading.toString()}</span></div>
+            <div>Mounted: <span className={mounted ? "text-green-600" : "text-red-600"}>{mounted.toString()}</span></div>
+            <div>Records Count: <span className="text-purple-600">{records.length}</span></div>
+          </div>
+          
+          {error && (
+            <div className="mt-2 p-2 bg-red-100 text-red-700 rounded">
+              <div className="font-bold">❌ 錯誤:</div>
+              <div className="text-xs mt-1">{error}</div>
+            </div>
+          )}
+          
+          <div className="mt-2">
+            Token: <span className={typeof window !== "undefined" && localStorage.getItem("tickeasy_token") ? "text-green-600" : "text-red-600"}>
+              {typeof window !== "undefined" && localStorage.getItem("tickeasy_token") ? "存在" : "不存在"}
+            </span>
+          </div>
+          
+          {debugInfo && (
+            <details className="mt-2">
+              <summary className="cursor-pointer text-blue-700 hover:text-blue-900">
+                📄 查看完整 API 回應 ({JSON.stringify(debugInfo).length} 字元)
+              </summary>
+              <div className="mt-2 p-2 bg-white rounded border max-h-60 overflow-auto">
+                <pre className="text-xs">{JSON.stringify(debugInfo, null, 2)}</pre>
+              </div>
+            </details>
+          )}
+          
+          {/* 快速測試按鈕 */}
+          <button 
+            onClick={() => {
+              if (SHOW_DEBUG) {
+                console.clear();
+                console.log("🔄 手動重新載入審核紀錄");
+              }
+              window.location.reload();
+            }}
+            className="mt-2 px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
+          >
+            🔄 重新載入
+          </button>
+        </div>
+      )}
+
       {loading ? (
-        <div className="text-sm text-muted-foreground">載入中...</div>
+        <div className="text-sm text-muted-foreground flex items-center gap-2">
+          <div className="animate-spin">⏳</div>
+          載入中...
+        </div>
+      ) : error ? (
+        <div className="text-sm text-red-600 bg-red-50 p-3 rounded border">
+          <div className="font-medium">載入失敗:</div>
+          <div className="mt-1 text-xs">{error}</div>
+          <div className="mt-2 text-xs text-gray-600">
+            💡 請檢查：
+            <ul className="list-disc ml-4 mt-1">
+              <li>網路連線是否正常</li>
+              <li>是否已登入 (Token 是否存在)</li>
+              <li>演唱會 ID 是否正確</li>
+              <li>後端 API 服務是否正常</li>
+            </ul>
+          </div>
+        </div>
       ) : records.length === 0 ? (
-        <div className="text-sm text-muted-foreground">尚無審核紀錄</div>
+        <div className="text-sm text-muted-foreground bg-yellow-50 p-3 rounded border">
+          📝 尚無審核紀錄
+          <div className="text-xs mt-1 text-gray-600">
+            此演唱會可能尚未進行過任何審核，或資料尚未同步。
+          </div>
+        </div>
       ) : (
         <div className="space-y-3">
+          <div className="text-sm text-green-600 mb-2">
+            ✅ 成功載入 {records.length} 筆審核紀錄
+          </div>
           {records.map((record, idx) => (
             <div key={record.reviewId || idx} className="bg-gray-50 rounded p-3 space-y-1 border">
               <div className="flex items-center gap-2">
@@ -229,4 +453,4 @@ const ConcertReviewHistory: React.FC<ConcertReviewHistoryProps> = ({ concertId }
   );
 };
 
-export default ConcertReviewHistory; 
+export default ConcertReviewHistory;

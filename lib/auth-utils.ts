@@ -25,14 +25,8 @@ export const handleCrossDomainAuth = (): boolean => {
       localStorage.setItem('tickeasy_token', token);
 
       // 設置用戶資訊（對應後台的 tickeasy_user）
-      // 需要轉換前端的格式到後台格式
-      const backendUserFormat = {
-        email: parsedUserInfo.email || '',
-        role: parsedUserInfo.role || 'user',
-        // 可能需要根據實際需求調整其他欄位
-      };
-
-      localStorage.setItem('tickeasy_user', JSON.stringify(backendUserFormat));
+      // 直接使用前端傳遞的完整用戶資訊，不需要格式轉換
+      localStorage.setItem('tickeasy_user', decodedUserInfo);
 
       // 清除 URL 參數，避免刷新頁面時重複處理
       const newUrl = window.location.pathname;

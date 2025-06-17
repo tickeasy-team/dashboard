@@ -14,27 +14,95 @@ const navItems = [
 ];
 
 interface User {
+  id?: string;
   email: string;
   name?: string;
+  nickname?: string;
   avatar?: string;
+  role?: string;
+  phone?: string;
+  birthday?: string;
+  gender?: string;
+  preferredRegions?: string[];
+  preferredEventTypes?: string[];
+  country?: string;
+  address?: string;
+  isEmailVerified?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
 
-  // 初始化時從 localStorage 獲取用戶資訊
-  useEffect(() => {
-    const userString = localStorage.getItem("tickeasy_user");
-    if (userString) {
-      try {
-        const userData = JSON.parse(userString);
-        setUser(userData);
-      } catch (error) {
-        console.error("解析用戶資訊失敗:", error);
+  // 獲取用戶資訊的 API 呼叫
+  const fetchUserProfile = async () => {
+    try {
+      const token = localStorage.getItem("tickeasy_token");
+      if (!token) {
+        console.log("No token found");
+        setIsLoadingUser(false);
+        return;
       }
+
+      const response = await fetch("https://tickeasy-team-backend.onrender.com/api/v1/users/profile", {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.status === "success" && data.data && data.data.user) {
+          const userData = data.data.user;
+          setUser(userData);
+          
+          // 同時更新 localStorage 中的用戶資訊
+          localStorage.setItem("tickeasy_user", JSON.stringify(userData));
+          console.log("Successfully fetched user profile:", userData);
+        } else {
+          console.error("API response error:", data);
+        }
+      } else {
+        console.error("Failed to fetch user profile:", response.status);
+        // 如果 API 失敗，嘗試從 localStorage 讀取
+        const userString = localStorage.getItem("tickeasy_user");
+        if (userString) {
+          try {
+            const userData = JSON.parse(userString);
+            setUser(userData);
+            console.log("Fallback to localStorage user data");
+          } catch (error) {
+            console.error("Failed to parse localStorage user data:", error);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      // 如果 API 失敗，嘗試從 localStorage 讀取
+      const userString = localStorage.getItem("tickeasy_user");
+      if (userString) {
+        try {
+          const userData = JSON.parse(userString);
+          setUser(userData);
+          console.log("Fallback to localStorage user data due to error");
+        } catch (error) {
+          console.error("Failed to parse localStorage user data:", error);
+        }
+      }
+    } finally {
+      setIsLoadingUser(false);
     }
+  };
+
+  // 初始化時獲取用戶資訊
+  useEffect(() => {
+    fetchUserProfile();
   }, []);
 
   // 登出功能
@@ -75,7 +143,12 @@ export default function Navbar() {
         
         {/* 右側：用戶資訊/登出 */}
         <div className="flex items-center gap-3">
-          {user ? (
+          {isLoadingUser ? (
+            /* 載入中狀態 */
+            <div className="text-sm text-gray-500">
+              載入中...
+            </div>
+          ) : user ? (
             <>
               {/* 用戶大頭貼 */}
               <Avatar.Root className="w-8 h-8 rounded-full overflow-hidden border bg-gray-100 flex items-center justify-center">
@@ -89,15 +162,28 @@ export default function Navbar() {
                   />
                 ) : (
                   <span className="text-sm font-medium text-gray-600">
-                    {user.name ? user.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
+                    {/* 優先顯示 nickname，然後 name，最後 email */}
+                    {user.nickname 
+                      ? user.nickname.charAt(0).toUpperCase() 
+                      : user.name 
+                        ? user.name.charAt(0).toUpperCase() 
+                        : user.email.charAt(0).toUpperCase()}
                   </span>
                 )}
               </Avatar.Root>
               
               {/* 用戶名稱 */}
               <span className="font-medium text-sm">
-                {user.name || user.email.split("@")[0]}
+                {/* 優先顯示 nickname，然後 name，最後 email 前綴 */}
+                {user.nickname || user.name || user.email.split("@")[0]}
               </span>
+              
+              {/* 角色標籤（如果是管理員） */}
+              {user.role === "admin" && (
+                <span className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">
+                  管理員
+                </span>
+              )}
               
               {/* 登出按鈕 */}
               <button
@@ -110,7 +196,7 @@ export default function Navbar() {
           ) : (
             /* 如果沒有用戶資訊，不顯示任何內容（因為會自動導向前端登入） */
             <div className="text-sm text-gray-500">
-              載入中...
+              未登入
             </div>
           )}
         </div>

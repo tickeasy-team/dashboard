@@ -43,8 +43,8 @@ export default function Navbar() {
     localStorage.removeItem("tickeasy_token");
     localStorage.removeItem("tickeasy_user");
     
-    // 重定向到登入頁面
-    router.push("/auth/login");
+    // 重定向到前端登入頁面
+    window.location.href = "https://frontend-fz4o.onrender.com/login";
   };
 
   return (
@@ -108,13 +108,10 @@ export default function Navbar() {
               </button>
             </>
           ) : (
-            /* 如果沒有用戶資訊，顯示登入連結 */
-            <Link 
-              href="/auth/login"
-              className="px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700 text-sm transition-colors"
-            >
-              登入
-            </Link>
+            /* 如果沒有用戶資訊，不顯示任何內容（因為會自動導向前端登入） */
+            <div className="text-sm text-gray-500">
+              載入中...
+            </div>
           )}
         </div>
       </div>

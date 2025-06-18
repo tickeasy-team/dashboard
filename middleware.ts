@@ -1,5 +1,4 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { updateSession } from "@/lib/supabase/middleware";
 
 // 後台全域驗證與跨域 token 處理
 export async function middleware(request: NextRequest) {
@@ -11,8 +10,8 @@ export async function middleware(request: NextRequest) {
     // 1) 先看 Cookie
     const cookieToken = request.cookies.get("tickeasy_token")?.value;
     if (cookieToken) {
-      // 有 Cookie，直接放行並同步 Supabase session
-      return await updateSession(request);
+      // 有 Cookie，直接放行
+      return NextResponse.next();
     }
 
     // 2) 再檢查 URL query ?token=
@@ -41,8 +40,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginURL);
   }
 
-  // 非 /dashboard 路徑：僅做 Supabase session 同步
-  return await updateSession(request);
+  // 非 /dashboard 路徑：直接放行
+  return NextResponse.next();
 }
 
 // 與原先設定保持一致：排除靜態資源

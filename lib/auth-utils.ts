@@ -24,6 +24,13 @@ export const handleCrossDomainAuth = (): boolean => {
       // 設置 token（對應後台的 tickeasy_token）
       localStorage.setItem('tickeasy_token', token);
 
+      // 同步寫入 cookie，供 Middleware 之後驗證
+      try {
+        document.cookie = `tickeasy_token=${token}; path=/; max-age=${60 * 60 * 24}; SameSite=Lax`;
+      } catch (err) {
+        console.warn('無法設定 cookie:', err);
+      }
+
       // 設置用戶資訊（對應後台的 tickeasy_user）
       // 直接使用前端傳遞的完整用戶資訊，不需要格式轉換
       localStorage.setItem('tickeasy_user', decodedUserInfo);
@@ -61,6 +68,13 @@ export const clearAuthData = (): void => {
   
   localStorage.removeItem('tickeasy_token');
   localStorage.removeItem('tickeasy_user');
+  
+  // 同步刪除同域 cookie，避免 Middleware 誤判
+  try {
+    document.cookie = 'tickeasy_token=; path=/; max-age=0';
+  } catch (err) {
+    console.warn('無法刪除 cookie:', err);
+  }
   
   // 導向前端登入頁面
   window.location.href = 'https://frontend-fz4o.onrender.com/login';

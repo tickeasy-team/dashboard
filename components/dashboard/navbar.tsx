@@ -110,6 +110,12 @@ export default function Navbar() {
     // 清除 localStorage
     localStorage.removeItem("tickeasy_token");
     localStorage.removeItem("tickeasy_user");
+    // 清除同域 cookie，避免 Middleware 誤判
+    try {
+      document.cookie = "tickeasy_token=; path=/; max-age=0";
+    } catch (err) {
+      console.warn("無法刪除 cookie", err);
+    }
     
     // 重定向到前端登入頁面
     window.location.href = "https://frontend-fz4o.onrender.com/login";

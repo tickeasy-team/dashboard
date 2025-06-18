@@ -35,9 +35,9 @@ export async function middleware(request: NextRequest) {
     }
 
     // 3) 都沒有 → 導向前端登入頁
-    const loginURL = new URL("https://frontend-fz4o.onrender.com/login");
-    loginURL.searchParams.set("next", request.nextUrl.href);
-    return NextResponse.redirect(loginURL);
+    // const loginURL = new URL("https://frontend-fz4o.onrender.com/login");
+    // loginURL.searchParams.set("next", request.nextUrl.href);
+    // return NextResponse.redirect(loginURL);
   }
 
   // 非 /dashboard 路徑：直接放行

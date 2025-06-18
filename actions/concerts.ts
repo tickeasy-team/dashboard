@@ -1,5 +1,7 @@
 // 已移除 Supabase 依賴，改為純客戶端函數
 
+import { getAuthToken } from "@/lib/auth-utils";
+
 export async function reviewConcert(
   concertId: string,
   reviewData: {
@@ -9,7 +11,7 @@ export async function reviewConcert(
 ) {
   try {
     // 從 localStorage 取得 token（需於前端呼叫）
-    const token = typeof window !== "undefined" ? localStorage.getItem("tickeasy_token") : null;
+    const token = typeof window !== "undefined" ? getAuthToken() : null;
     if (!token) {
       return { success: false, error: "未登入或缺少 token" };
     }

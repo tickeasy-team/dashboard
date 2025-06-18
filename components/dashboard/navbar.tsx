@@ -5,6 +5,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import * as Avatar from "@radix-ui/react-avatar";
+import { getAuthToken } from "@/lib/auth-utils";
 
 // 導覽列項目
 const navItems = [
@@ -41,7 +42,7 @@ export default function Navbar() {
   // 獲取用戶資訊的 API 呼叫
   const fetchUserProfile = async () => {
     try {
-      const token = localStorage.getItem("tickeasy_token");
+      const token = getAuthToken();
       if (!token) {
         console.log("No token found");
         setIsLoadingUser(false);
@@ -107,8 +108,7 @@ export default function Navbar() {
 
   // 登出功能
   const handleLogout = () => {
-    // 清除 localStorage
-    localStorage.removeItem("tickeasy_token");
+    // 清除 user 資訊 (token 僅在 cookie 中，不用刪 localStorage token)
     localStorage.removeItem("tickeasy_user");
     // 清除同域 cookie，避免 Middleware 誤判
     try {

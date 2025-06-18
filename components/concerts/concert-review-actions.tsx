@@ -10,6 +10,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { getAuthToken } from "@/lib/auth-utils";
 
 interface ConcertReviewActionsProps {
   concertId: string;
@@ -42,7 +43,7 @@ const ConcertReviewActions: React.FC<ConcertReviewActionsProps> = ({ concertId, 
     setIsLoading(true);
     try {
       // 從 localStorage 取得 token，並加到 Authorization header
-      const token = typeof window !== "undefined" ? localStorage.getItem("tickeasy_token") : null;
+      const token = typeof window !== "undefined" ? getAuthToken() : null;
       const res = await fetch("/dashboard/concerts/review", {
         method: "POST",
         headers: {

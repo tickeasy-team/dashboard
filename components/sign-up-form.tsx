@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useState } from "react";
+import React from "react";
 
 export function SignUpForm({
   className,
@@ -49,7 +50,9 @@ export function SignUpForm({
         });
         const loginData = await loginRes.json();
         if (loginData.token) {
-          localStorage.setItem("tickeasy_token", loginData.token);
+          try {
+            document.cookie = `tickeasy_token=${loginData.token}; path=/; max-age=${60 * 60 * 24}; SameSite=Lax`;
+          } catch {}
           localStorage.setItem("tickeasy_user", JSON.stringify(loginData.user));
           window.location.href = "/";
         } else {

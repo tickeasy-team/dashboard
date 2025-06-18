@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Concert } from "@/lib/types/concert";
 import {
   Dialog,
@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { CheckCircle, XCircle } from "lucide-react";
+import { getAuthToken } from "@/lib/auth-utils";
 
 // 上次審核結果型別
 interface ReviewRecord {
@@ -57,7 +58,7 @@ export function ReviewDialog({
       return;
     }
     setIsReviewLoading(true);
-    const token = typeof window !== "undefined" ? localStorage.getItem("tickeasy_token") : null;
+    const token = typeof window !== "undefined" ? getAuthToken() : null;
     fetch(`https://tickeasy-team-backend.onrender.com/api/v1/concerts/${concert.concertId}/reviews`, {
       headers: {
         ...(token ? { "Authorization": `Bearer ${token}` } : {}),
@@ -104,7 +105,7 @@ export function ReviewDialog({
     
     try {
       // 從 localStorage 取得 token，並加到 Authorization header
-      const token = typeof window !== "undefined" ? localStorage.getItem("tickeasy_token") : null;
+      const token = typeof window !== "undefined" ? getAuthToken() : null;
       const res = await fetch(`https://tickeasy-team-backend.onrender.com/api/v1/concerts/${concert.concertId}/manual-review`, {
         method: "POST",
         headers: {

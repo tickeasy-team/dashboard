@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { getAuthToken } from "@/lib/auth-utils";
 
 const TOKEN_KEY = "tickeasy_token";
 const USER_KEY = "tickeasy_user";
@@ -10,7 +11,7 @@ export function useAuth() {
 
   // 初始化時從 localStorage 讀取
   useEffect(() => {
-    const t = localStorage.getItem(TOKEN_KEY);
+    const t = getAuthToken();
     const u = localStorage.getItem(USER_KEY);
     setToken(t);
     setUser(u ? JSON.parse(u) : null);
@@ -25,7 +26,11 @@ export function useAuth() {
     });
     const data = await res.json();
     if (data.token) {
-      localStorage.setItem(TOKEN_KEY, data.token);
+      // 寫 cookie 由後端 Set-Cookie 或此處補寫
+      try {
+        document.cookie = `tickeasy_token=${data.token}; path=/; max-age=${60 * 60 * 24}; SameSite=Lax`;
+      } catch {}
+      // token 僅在 cookie 中
       localStorage.setItem(USER_KEY, JSON.stringify(data.user));
       setToken(data.token);
       setUser(data.user);
@@ -53,7 +58,7 @@ export function useAuth() {
 
   // 登出
   const logout = useCallback(() => {
-    localStorage.removeItem(TOKEN_KEY);
+    // Cookie 清除在外部流程；這裡不再管理 TOKEN_KEY
     localStorage.removeItem(USER_KEY);
     setToken(null);
     setUser(null);

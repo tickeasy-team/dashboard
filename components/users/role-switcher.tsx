@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { UserRole } from "@/lib/types/user";
 import {
   Select,
@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { getAuthToken } from "@/lib/auth-utils";
 
 interface RoleSwitcherProps {
   userId: string;
@@ -23,7 +24,7 @@ export function RoleSwitcher({ userId, currentRole, onRoleChange }: RoleSwitcher
   const handleRoleChange = async (newRole: string) => {
     setIsLoading(true);
     try {
-      const token = typeof window !== "undefined" ? localStorage.getItem("tickeasy_token") : null;
+      const token = typeof window !== "undefined" ? getAuthToken() : null;
       if (!token) {
         toast.error("未登入或缺少 token");
         setIsLoading(false);

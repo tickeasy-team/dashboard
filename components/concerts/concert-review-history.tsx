@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { getAuthToken } from "@/lib/auth-utils";
 
 // AI 回應型別
 interface AIResponse {
@@ -129,7 +130,7 @@ const ConcertReviewHistory: React.FC<ConcertReviewHistoryProps> = ({ concertId }
     // 延遲執行，確保 localStorage 完全可用
     const timer = setTimeout(() => {
       // 檢查 token
-      const token = typeof window !== "undefined" ? localStorage.getItem("tickeasy_token") : null;
+      const token = typeof window !== "undefined" ? getAuthToken() : null;
       
       if (SHOW_DEBUG) {
         console.log("🔑 Token 檢查:");
@@ -311,8 +312,8 @@ const ConcertReviewHistory: React.FC<ConcertReviewHistoryProps> = ({ concertId }
           )}
           
           <div className="mt-2">
-            Token: <span className={typeof window !== "undefined" && localStorage.getItem("tickeasy_token") ? "text-green-600" : "text-red-600"}>
-              {typeof window !== "undefined" && localStorage.getItem("tickeasy_token") ? "存在" : "不存在"}
+            Token: <span className={typeof window !== "undefined" && getAuthToken() ? "text-green-600" : "text-red-600"}>
+              {typeof window !== "undefined" && getAuthToken() ? "存在" : "不存在"}
             </span>
           </div>
           

@@ -21,18 +21,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         return;
       }
 
-      // 檢查 localStorage 是否有 token，無則導向前端登入頁
-      if (typeof window !== "undefined") {
-        const token = localStorage.getItem("tickeasy_token");
-        console.log("dashboard layout 檢查 token", token);
-        
-        if (!token) {
-          // 導向前端登入頁面而非後台登入頁面
-          window.location.href = "https://frontend-fz4o.onrender.com/login";
-        } else {
-          setIsLoading(false);
-        }
-      }
+      // 不再檢查 localStorage token；直接結束 Loading
+      setIsLoading(false);
     };
 
     handleAuth();

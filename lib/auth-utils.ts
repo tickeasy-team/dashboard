@@ -21,10 +21,7 @@ export const handleCrossDomainAuth = (): boolean => {
       const decodedUserInfo = decodeURIComponent(userInfo);
       const parsedUserInfo = JSON.parse(decodedUserInfo);
 
-      // 設置 token（對應後台的 tickeasy_token）
-      localStorage.setItem('tickeasy_token', token);
-
-      // 同步寫入 cookie，供 Middleware 之後驗證
+      // 將 token 寫入 cookie，供 Middleware 與前端存取
       try {
         document.cookie = `tickeasy_token=${token}; path=/; max-age=${60 * 60 * 24}; SameSite=Lax`;
       } catch (err) {
@@ -56,7 +53,7 @@ export const handleCrossDomainAuth = (): boolean => {
 export const hasValidToken = (): boolean => {
   if (typeof window === 'undefined') return false;
   
-  const token = localStorage.getItem('tickeasy_token');
+  const token = typeof document !== 'undefined' ? getAuthToken() : null;
   return !!token;
 };
 
@@ -93,4 +90,13 @@ export const getCurrentUser = () => {
     console.error('解析用戶資訊失敗:', error);
     return null;
   }
+};
+
+/**
+ * 從同域 Cookie 讀取 JWT (tickeasy_token)
+ */
+export const getAuthToken = (): string | null => {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(/(?:^|; )tickeasy_token=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : null;
 };

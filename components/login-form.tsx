@@ -35,7 +35,9 @@ export function LoginForm({
       });
       const data = await res.json();
       if (data.status === "success" && data.data && data.data.token) {
-        localStorage.setItem("tickeasy_token", data.data.token);
+        try {
+          document.cookie = `tickeasy_token=${data.data.token}; path=/; max-age=${60 * 60 * 24}; SameSite=Lax`;
+        } catch {}
         localStorage.setItem("tickeasy_user", JSON.stringify(data.data.user));
         window.location.href = "/dashboard";
         return;

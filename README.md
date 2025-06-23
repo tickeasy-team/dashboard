@@ -28,60 +28,31 @@ Tickeasy Dashboard 是一個功能完整的演唱會售票網站後台管理系�
 
 ### 🎵 演唱會管理模組
 - **演唱會列表**
-  - 分頁瀏覽所有演唱會
-  - 多條件篩選（狀態、審核狀態、時間範圍）
-  - 批量操作功能
+  - 多條件篩選
 - **演唱會詳情**
-  - 基本資訊管理（標題、簡介、地點、時間）
+  - 基本資訊管理
   - 主辦單位資訊
   - 場地與座位配置
-  - 票種設定管理
 - **審核流程**
   - 四階段審核狀態：草稿、審核中、已發布、已拒絕
   - 審核歷史記錄追蹤
   - 審核備註功能
-  - 自動通知機制
 
 ### 👥 用戶管理模組
 - **用戶列表**
   - 查看所有註冊用戶
-  - 用戶資料編輯
   - 搜尋與篩選功能
 - **角色管理**
   - 三種角色類型：一般用戶、管理員、超級管理員
-  - 角色變更歷史記錄
-- **權限控制**
-  - 基於角色的訪問控制（RBAC）
-  - 功能級別權限設定
 
 ### 📋 訂單管理模組
 - **訂單狀態管理**
   - 五種狀態：保留中、已過期、已付款、已取消、已退款
-  - 狀態轉換記錄
-  - 訂單鎖定機制
 - **訂單詳情**
   - 購買人完整資訊
   - 票券明細與座位資訊
   - 發票資訊管理
   - 付款方式追蹤
-- **統計報表**
-  - 訂單狀態分布
-  - 銷售趨勢圖表
-  - 收入統計分析
-
-### 📊 數據儀表板
-- **總覽指標**
-  - 用戶成長趨勢
-  - 演唱會發布統計
-  - 訂單交易量分析
-  - 營收數據圖表
-- **待辦事項**
-  - 待審核演唱會數量
-  - 異常訂單提醒
-  - 系統通知中心
-- **快速操作**
-  - 常用功能捷徑
-  - 最近訪問記錄
 
 ## 🛠 技術架構
 
@@ -374,52 +345,6 @@ CMD ["npm", "start"]
 - **orders** - 訂單記錄
 - **ticket_types** - 票種設定
 - **concert_sessions** - 場次資訊
-
-詳細結構請參考 [`docs/supabase.sql`](./docs/supabase.sql)
-
-## 🤝 貢獻指南
-
-歡迎提交 Pull Request 或開啟 Issue！
-
-1. Fork 專案
-2. 建立功能分支（`git checkout -b feature/AmazingFeature`）
-3. 提交變更（`git commit -m 'Add some AmazingFeature'`）
-4. 推送分支（`git push origin feature/AmazingFeature`）
-5. 開啟 Pull Request
-
-## 📝 授權協議
-
-本專案採用 MIT 授權協議 - 詳見 [LICENSE](LICENSE) 文件
-
-## 🔗 相關連結
-
-- [Next.js 文檔](https://nextjs.org/docs)
-- [Supabase 文檔](https://supabase.com/docs)
-- [Tailwind CSS 文檔](https://tailwindcss.com/docs)
-- [shadcn/ui 文檔](https://ui.shadcn.com)
-- [前端網站](https://frontend-fz4o.onrender.com)
-- [後端 API](https://tickeasy-team-backend.onrender.com)
-
-## 💡 疑難排解
-
-### 常見問題
-
-**Q: 無法登入後台系統？**
-A: 請先到前端網站登入，然後點擊「後台管理」按鈕。
-
-**Q: 環境變數設定錯誤？**
-A: 確保 `.env.local` 中的所有必要變數都已正確設定。
-
-**Q: 建置失敗？**
-A: 請確認 Node.js 版本為 18.0 以上，並清除 `.next` 資料夾後重試。
-
-### 聯絡支援
-
-如有其他問題，請透過以下方式聯絡：
-
-- 📧 Email: support@tickeasy.com
-- 💬 Discord: [Tickeasy Community](https://discord.gg/tickeasy)
-- 🐛 Issues: [GitHub Issues](https://github.com/your-username/tickeasy_team_dashboard/issues)
 
 ---
 

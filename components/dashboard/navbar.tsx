@@ -159,7 +159,7 @@ export default function Navbar() {
               {/* 用戶大頭貼 */}
               <Avatar.Root className="w-8 h-8 rounded-full overflow-hidden border bg-gray-100 flex items-center justify-center">
                 {user.avatar ? (
-                  <Image 
+                  <img 
                     src={user.avatar} 
                     alt="用戶頭像" 
                     width={32} 
@@ -185,7 +185,7 @@ export default function Navbar() {
               </span>
               
               {/* 角色標籤（如果是管理員） */}
-              {user.role === "admin" && (
+              {(user.role === "admin" || user.role === "superuser") && (
                 <span className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">
                   管理員
                 </span>
